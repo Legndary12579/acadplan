@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 import { saveStudentPlan } from "@/lib/supabase";
 import type { PlanRequest, PlanResponse, ApiError } from "@/types";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+const genAI = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY!,
 });
+
+const GEMINI_MODEL = "gemini-2.5-flash";
 
 // ── System Prompt ──────────────────────────────────────────
 const SYSTEM_PROMPT = `You are an expert academic counselor and college planning advisor with 20+ years of experience helping high school students achieve their academic goals. You have access to web search to find real, current opportunities near the student's location.
@@ -96,34 +98,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Call Claude with web search enabled
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 4096,
-      system: SYSTEM_PROMPT,
-      tools: [
-        {
-          type: "web_search_20250305" as const,
-          name: "web_search",
-        },
-      ],
-      messages: [
-        {
-          role: "user",
-          content: buildUserPrompt(body),
-        },
-      ],
+    // Call Gemini with Google Search grounding enabled
+    const response = await genAI.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: buildUserPrompt(body),
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        maxOutputTokens: 4096,
+        tools: [{ googleSearch: {} }],
+      },
     });
 
-    // Extract all text content blocks (including after tool use)
-    const planText = response.content
-      .filter((block) => block.type === "text")
-      .map((block) => (block as { type: "text"; text: string }).text)
-      .join("\n");
+    const planText = response.text ?? "";
 
     if (!planText) {
       return NextResponse.json<ApiError>(
-        { error: "Claude returned an empty response. Please try again." },
+        { error: "Gemini returned an empty response. Please try again." },
         { status: 502 }
       );
     }
@@ -145,16 +135,15 @@ export async function POST(request: NextRequest) {
   } catch (err: unknown) {
     console.error("[API /plan] Unhandled error:", err);
 
-    if (err instanceof Anthropic.APIError) {
-      return NextResponse.json<ApiError>(
-        { error: "Claude API error. Please try again.", details: err.message },
-        { status: err.status ?? 500 }
-      );
-    }
+    const message = err instanceof Error ? err.message : "Unknown error";
+    const status =
+      typeof err === "object" && err !== null && "status" in err
+        ? Number((err as { status?: number }).status) || 500
+        : 500;
 
     return NextResponse.json<ApiError>(
-      { error: "An unexpected error occurred. Please try again." },
-      { status: 500 }
+      { error: "Gemini API error. Please try again.", details: message },
+      { status }
     );
   }
 }
@@ -162,7 +151,7 @@ export async function POST(request: NextRequest) {
 // ── GET — health check ─────────────────────────────────────
 export async function GET() {
   return NextResponse.json(
-    { status: "ok", route: "/api/plan", model: "claude-sonnet-4-6", webSearch: true },
+    { status: "ok", route: "/api/plan", model: GEMINI_MODEL, webSearch: true },
     { status: 200 }
   );
 }

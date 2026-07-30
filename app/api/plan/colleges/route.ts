@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+const genAI = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY!,
 });
+
+const GEMINI_MODEL = "gemini-2.5-flash";
 
 const SYSTEM_PROMPT = `You are an expert college admissions counselor with deep knowledge of hundreds of universities across the United States. You have access to web search to find current, accurate data about colleges.
 
@@ -74,28 +76,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 4096,
-      system: SYSTEM_PROMPT,
-      tools: [
-        {
-          type: "web_search_20250305" as const,
-          name: "web_search",
-        },
-      ],
-      messages: [
-        {
-          role: "user",
-          content: buildPrompt(body),
-        },
-      ],
+    // Note: Gemini doesn't allow combining Google Search grounding with
+    // JSON response mode in the same request, so — same as before — we
+    // ask for raw JSON via the prompt and parse it manually.
+    const response = await genAI.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: buildPrompt(body),
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        maxOutputTokens: 4096,
+        tools: [{ googleSearch: {} }],
+      },
     });
 
-    const rawText = response.content
-      .filter((block) => block.type === "text")
-      .map((block) => (block as { type: "text"; text: string }).text)
-      .join("\n");
+    const rawText = response.text ?? "";
+
+    if (!rawText) {
+      return NextResponse.json(
+        { error: "Gemini returned an empty response. Please try again." },
+        { status: 502 }
+      );
+    }
 
     // Parse JSON — strip any accidental markdown fences
     const cleaned = rawText.replace(/```json|```/g, "").trim();
@@ -105,16 +106,15 @@ export async function POST(request: NextRequest) {
   } catch (err: unknown) {
     console.error("[API /colleges] Error:", err);
 
-    if (err instanceof Anthropic.APIError) {
-      return NextResponse.json(
-        { error: "Claude API error. Please try again.", details: err.message },
-        { status: err.status ?? 500 }
-      );
-    }
+    const message = err instanceof Error ? err.message : "Unknown error";
+    const status =
+      typeof err === "object" && err !== null && "status" in err
+        ? Number((err as { status?: number }).status) || 500
+        : 500;
 
     return NextResponse.json(
-      { error: "Failed to generate college list. Please try again." },
-      { status: 500 }
+      { error: "Failed to generate college list. Please try again.", details: message },
+      { status }
     );
   }
 }

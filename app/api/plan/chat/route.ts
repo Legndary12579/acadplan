@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+const genAI = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY!,
 });
+
+const GEMINI_MODEL = "gemini-2.5-flash";
+
+// Gemini uses "model" instead of "assistant" for the AI turn role
+type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const SYSTEM_PROMPT = `You are an expert college and academic planning advisor helping high school students with questions about:
 - SAT/ACT preparation and test strategy
@@ -25,17 +30,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid messages format." }, { status: 400 });
     }
 
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages,
+    // Gemini expects contents as [{ role, parts: [{ text }] }],
+    // and uses "model" instead of "assistant" for the AI's turns.
+    const contents = (messages as ChatMessage[]).map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+
+    const response = await genAI.models.generateContent({
+      model: GEMINI_MODEL,
+      contents,
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        maxOutputTokens: 1024,
+      },
     });
 
-    const text = response.content
-      .filter((block) => block.type === "text")
-      .map((block) => (block as { type: "text"; text: string }).text)
-      .join("\n");
+    const text = response.text ?? "";
 
     return NextResponse.json({ reply: text }, { status: 200 });
   } catch (err: unknown) {
