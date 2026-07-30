@@ -5,7 +5,7 @@ const genAI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
 });
 
-const GEMINI_MODEL = "gemini-2.5-flash";
+const GEMINI_MODEL = "gemini-3.5-flash";
 
 // Gemini uses "model" instead of "assistant" for the AI turn role
 type ChatMessage = { role: "user" | "assistant"; content: string };
