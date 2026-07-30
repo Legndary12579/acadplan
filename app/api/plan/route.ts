@@ -3,11 +3,20 @@ import { GoogleGenAI } from "@google/genai";
 import { saveStudentPlan } from "@/lib/supabase";
 import type { PlanRequest, PlanResponse, ApiError } from "@/types";
 
-const genAI = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY!,
-});
-
 const GEMINI_MODEL = "gemini-3.5-flash";
+
+let genAI: GoogleGenAI | null = null;
+function getGenAI(): GoogleGenAI {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error(
+      "GEMINI_API_KEY is not set in this environment. Add it in Vercel → Settings → Environment Variables and redeploy."
+    );
+  }
+  if (!genAI) {
+    genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  }
+  return genAI;
+}
 
 // ── System Prompt ──────────────────────────────────────────
 const SYSTEM_PROMPT = `You are an expert academic counselor and college planning advisor with 20+ years of experience helping high school students achieve their academic goals. You have access to web search to find real, current opportunities near the student's location.
@@ -99,7 +108,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Call Gemini with Google Search grounding enabled
-    const response = await genAI.models.generateContent({
+    const response = await getGenAI().models.generateContent({
       model: GEMINI_MODEL,
       contents: buildUserPrompt(body),
       config: {

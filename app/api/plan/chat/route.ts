@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
-const genAI = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY!,
-});
-
 const GEMINI_MODEL = "gemini-3.5-flash";
+
+let genAI: GoogleGenAI | null = null;
+function getGenAI(): GoogleGenAI {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error(
+      "GEMINI_API_KEY is not set in this environment. Add it in Vercel → Settings → Environment Variables and redeploy."
+    );
+  }
+  if (!genAI) {
+    genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  }
+  return genAI;
+}
 
 // Gemini uses "model" instead of "assistant" for the AI turn role
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -37,7 +46,7 @@ export async function POST(request: NextRequest) {
       parts: [{ text: m.content }],
     }));
 
-    const response = await genAI.models.generateContent({
+    const response = await getGenAI().models.generateContent({
       model: GEMINI_MODEL,
       contents,
       config: {

@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
-const genAI = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY!,
-});
-
 const GEMINI_MODEL = "gemini-3.5-flash";
+
+let genAI: GoogleGenAI | null = null;
+function getGenAI(): GoogleGenAI {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error(
+      "GEMINI_API_KEY is not set in this environment. Add it in Vercel → Settings → Environment Variables and redeploy."
+    );
+  }
+  if (!genAI) {
+    genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  }
+  return genAI;
+}
 
 const SYSTEM_PROMPT = `You are an expert college admissions counselor with deep knowledge of hundreds of universities across the United States. You have access to web search to find current, accurate data about colleges.
 
@@ -79,7 +88,7 @@ export async function POST(request: NextRequest) {
     // Note: Gemini doesn't allow combining Google Search grounding with
     // JSON response mode in the same request, so — same as before — we
     // ask for raw JSON via the prompt and parse it manually.
-    const response = await genAI.models.generateContent({
+    const response = await getGenAI().models.generateContent({
       model: GEMINI_MODEL,
       contents: buildPrompt(body),
       config: {
