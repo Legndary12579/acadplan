@@ -293,7 +293,7 @@ export default function CollegesPage() {
     setResult(null);
 
     try {
-      const res = await fetch("/api/colleges", {
+      const res = await fetch("/api/plan/colleges", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

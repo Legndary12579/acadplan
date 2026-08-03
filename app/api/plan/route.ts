@@ -19,7 +19,10 @@ function getGenAI(): GoogleGenAI {
 }
 
 // ── System Prompt ──────────────────────────────────────────
-const SYSTEM_PROMPT = `You are an expert academic counselor and college planning advisor with 20+ years of experience helping high school students achieve their academic goals. You have access to web search to find real, current opportunities near the student's location.
+// Note: no web search grounding — Gemini's free-tier search grounding
+// quota was returning 429s immediately for this account. This relies
+// on the model's own training knowledge instead of live search.
+const SYSTEM_PROMPT = `You are an expert academic counselor and college planning advisor with 20+ years of experience helping high school students achieve their academic goals.
 
 When given a student's profile, produce a comprehensive, structured academic plan using the following format:
 
@@ -30,16 +33,16 @@ Brief assessment of the student's current standing and potential.
 For each remaining year of high school, list specific recommended courses with level (Standard / Honors / AP / IB / Dual Enrollment). Be specific about which AP courses align with their intended major.
 
 ## 🏆 Extracurricular & Leadership Strategy
-List specific clubs, competitions, and leadership roles. Search for real programs and organizations near the student's location that match their major and career goals.
+List specific types of clubs, competitions, and leadership roles that fit the student's interests and major. Describe well-known national/regional programs and organizations relevant to their field (note: since this doesn't use live web search, favor well-established, broadly-known programs over hyper-local or newly-launched ones).
 
-## 💼 Internships & Volunteering Near You
-Search for and list REAL, specific internship programs and volunteering opportunities near the student's city or zip code that align with their intended major and career goals. Include organization names, program names, and how to apply. Focus on opportunities available to high school students.
+## 💼 Internships & Volunteering Strategies
+Describe the TYPES of internship programs and volunteering opportunities that align with their intended major and career goals, and general strategies for finding them locally (e.g. "search for X type of organization near your city," "check with your school's Y department"). Since you don't have live web access, avoid inventing specific named local organizations you can't verify — speak in terms of categories and search strategies instead.
 
 ## 📝 Standardized Test Roadmap
 Testing timeline (PSAT, SAT/ACT), target scores based on their goal colleges, and specific prep recommendations.
 
 ## 🎯 College List Strategy
-5-7 specific college recommendations across reach, match, and safety tiers. For each college, explain why it's a great fit for their specific major and career goals. Include acceptance rates and any notable programs.
+5-7 specific college recommendations across reach, match, and safety tiers, based on your general knowledge. For each college, explain why it's a great fit for their specific major and career goals. Include a general sense of selectivity and any well-known programs, but note that acceptance rates and program details should be verified on the school's website since they change year to year.
 
 ## 💡 Key Action Items (Next 90 Days)
 5 concrete, prioritized next steps the student should take immediately. Be specific and actionable.
@@ -47,7 +50,7 @@ Testing timeline (PSAT, SAT/ACT), target scores based on their goal colleges, an
 ## ⚠️ Areas to Watch
 Honest assessment of gaps or challenges to address.
 
-Use web search extensively to find real local opportunities, current program information, and up-to-date college data. Always use the student's name throughout the plan.`;
+Always use the student's name throughout the plan.`;
 
 // ── Build User Prompt ──────────────────────────────────────
 function buildUserPrompt(req: PlanRequest): string {
@@ -61,7 +64,7 @@ function buildUserPrompt(req: PlanRequest): string {
     undecided: "Undecided",
   };
 
-  return `Please create a comprehensive academic plan for the following student. Use web search to find real internships, volunteering opportunities, and extracurricular programs near their location that match their major and career goals.
+  return `Please create a comprehensive academic plan for the following student.
 
 **Name:** ${student.name}
 **Current Grade:** ${student.gradeLevel} Grade
@@ -74,13 +77,6 @@ function buildUserPrompt(req: PlanRequest): string {
 **Current Challenges / Concerns:** ${student.challenges || "None listed"}
 ${student.satScore ? `**SAT Score:** ${student.satScore}` : ""}
 ${student.actScore ? `**ACT Score:** ${student.actScore}` : ""}
-
-Important: Please search the web for:
-1. Real internship programs for high school students near ${student.location || "their area"} related to ${student.intendedMajor}
-2. Volunteering opportunities near ${student.location || "their area"} relevant to their goals
-3. Local clubs, competitions, and organizations for ${student.intendedMajor} students
-4. Current acceptance rates and program details for recommended colleges
-5. Specific AP courses and dual enrollment options relevant to ${student.intendedMajor}
 
 Please provide a detailed, personalized plan that addresses ${student.name}'s specific situation.`;
 }
@@ -107,14 +103,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Call Gemini with Google Search grounding enabled
     const response = await getGenAI().models.generateContent({
       model: GEMINI_MODEL,
       contents: buildUserPrompt(body),
       config: {
         systemInstruction: SYSTEM_PROMPT,
         maxOutputTokens: 4096,
-        tools: [{ googleSearch: {} }],
       },
     });
 
@@ -160,7 +154,7 @@ export async function POST(request: NextRequest) {
 // ── GET — health check ─────────────────────────────────────
 export async function GET() {
   return NextResponse.json(
-    { status: "ok", route: "/api/plan", model: GEMINI_MODEL, webSearch: true },
+    { status: "ok", route: "/api/plan", model: GEMINI_MODEL, webSearch: false },
     { status: 200 }
   );
 }

@@ -16,7 +16,11 @@ function getGenAI(): GoogleGenAI {
   return genAI;
 }
 
-const SYSTEM_PROMPT = `You are an expert college admissions counselor with deep knowledge of hundreds of universities across the United States. You have access to web search to find current, accurate data about colleges.
+// Note: no web search grounding — Gemini's free-tier search grounding
+// quota was returning 429s immediately for this account. This relies
+// on the model's own training knowledge instead of live search, so
+// acceptance rates/tuition are approximate and should be verified.
+const SYSTEM_PROMPT = `You are an expert college admissions counselor with deep knowledge of hundreds of universities across the United States.
 
 When given a student profile, return a JSON object with this exact structure — no markdown, no explanation, just raw JSON:
 
@@ -40,15 +44,15 @@ When given a student profile, return a JSON object with this exact structure —
       "whyItFits": "2-3 sentences on why this school is perfect for this specific student's major, goals, and profile",
       "notablePrograms": ["Program 1", "Program 2", "Program 3"],
       "applicationTips": ["Tip 1 specific to this school", "Tip 2", "Tip 3"],
-      "financialAid": "Specific info about merit aid, need-based aid, or scholarships at this school",
-      "deadlines": "Early Decision: Nov 1, Regular Decision: Jan 1",
+      "financialAid": "General info about merit aid, need-based aid, or scholarships typically available at this type of school",
+      "deadlines": "Typical: Early Decision ~Nov 1, Regular Decision ~Jan 1 (verify exact current dates on the school's site)",
       "strengths": ["Strength 1", "Strength 2", "Strength 3"],
       "campusLife": "1-2 sentences about campus culture and student life"
     }
   ]
 }
 
-Include 7-10 schools total: 2-3 reach, 3-4 match, 2-3 safety. Use web search to verify current acceptance rates, tuition, and program info. Tailor everything to the student's specific major, GPA, test scores, and goals. Return ONLY the JSON object, nothing else.`;
+Include 7-10 schools total: 2-3 reach, 3-4 match, 2-3 safety. Use your general knowledge to provide realistic acceptance rates, tuition, and program info, and note in the tagline/deepDive fields where relevant that exact current figures should be verified on the school's official site. Tailor everything to the student's specific major, GPA, test scores, and goals. Return ONLY the JSON object, nothing else.`;
 
 function buildPrompt(data: {
   name: string;
@@ -71,7 +75,7 @@ Target College Type: ${data.collegeType}
 Home Location: ${data.location}
 Special Interests / Notes: ${data.interests || "None"}
 
-Search the web for current acceptance rates, notable programs for ${data.intendedMajor}, tuition costs, and financial aid info for each recommended school. Make sure the mix includes reach, match, and safety schools appropriate for a student with GPA ${data.gpa}${data.satScore ? ` and SAT ${data.satScore}` : ""}.`;
+Make sure the mix includes reach, match, and safety schools appropriate for a student with GPA ${data.gpa}${data.satScore ? ` and SAT ${data.satScore}` : ""}.`;
 }
 
 export async function POST(request: NextRequest) {
@@ -85,16 +89,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Note: Gemini doesn't allow combining Google Search grounding with
-    // JSON response mode in the same request, so — same as before — we
-    // ask for raw JSON via the prompt and parse it manually.
     const response = await getGenAI().models.generateContent({
       model: GEMINI_MODEL,
       contents: buildPrompt(body),
       config: {
         systemInstruction: SYSTEM_PROMPT,
         maxOutputTokens: 4096,
-        tools: [{ googleSearch: {} }],
       },
     });
 
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json(
-    { status: "ok", route: "/api/colleges", webSearch: true },
+    { status: "ok", route: "/api/plan/colleges", webSearch: false },
     { status: 200 }
   );
 }
