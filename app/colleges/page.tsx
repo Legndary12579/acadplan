@@ -42,6 +42,7 @@ interface FormData {
   collegeType: string;
   location: string;
   interests: string;
+  awardsHonorsEcs: string;
   isTexasResident: boolean;
   classRank: string;
   classSize: string;
@@ -56,6 +57,7 @@ const EMPTY_FORM: FormData = {
   collegeType: "",
   location: "",
   interests: "",
+  awardsHonorsEcs: "",
   isTexasResident: false,
   classRank: "",
   classSize: "",
@@ -421,6 +423,20 @@ export default function CollegesPage() {
                 <div className="flex flex-col gap-1.5">
                   <label className="form-label">Special Interests / Notes</label>
                   <input type="text" className="form-input" placeholder="e.g. strong research, small campus, warm weather" value={form.interests} onChange={(e) => update("interests", e.target.value)} />
+                </div>
+
+                <div className="md:col-span-2 flex flex-col gap-1.5">
+                  <label className="form-label">Awards, Honors & Extracurriculars</label>
+                  <textarea
+                    className="form-input resize-none"
+                    rows={3}
+                    placeholder="e.g. National Merit Semifinalist, Varsity Debate Captain, Eagle Scout, robotics club president, 200+ volunteer hours at local hospital…"
+                    value={form.awardsHonorsEcs}
+                    onChange={(e) => update("awardsHonorsEcs", e.target.value)}
+                  />
+                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                    Optional, but helps tailor recommendations — especially for competitive majors where auto-admit only guarantees the school, not the program.
+                  </p>
                 </div>
 
                 <div className="md:col-span-2 flex flex-col gap-1.5">

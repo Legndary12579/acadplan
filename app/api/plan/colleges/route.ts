@@ -76,6 +76,7 @@ function buildPrompt(data: {
   collegeType: string;
   location: string;
   interests: string;
+  awardsHonorsEcs?: string;
   isTexasResident?: boolean;
   classRank?: string;
   classSize?: string;
@@ -103,7 +104,10 @@ ACT Score: ${data.actScore || "Not taken"}
 Intended Major: ${data.intendedMajor}
 Target College Type: ${data.collegeType}
 Home Location: ${data.location}
-Special Interests / Notes: ${data.interests || "None"}${texasSection}
+Special Interests / Notes: ${data.interests || "None"}
+Awards, Honors & Extracurriculars: ${data.awardsHonorsEcs || "None listed"}${texasSection}
+
+Use the awards/honors/extracurriculars to inform "whyItFits", "applicationTips", and how competitive the student is for selective programs — this matters especially for schools/majors that don't use auto-admit or where auto-admit only guarantees the university, not the specific program.
 
 Make sure the mix includes reach, match, and safety schools appropriate for a student with GPA ${data.gpa}${data.satScore ? ` and SAT ${data.satScore}` : ""}.`;
 }
