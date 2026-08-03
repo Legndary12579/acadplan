@@ -366,7 +366,7 @@ export default function CollegesPage() {
             </span>
           </h1>
           <p className="text-sm md:text-base max-w-lg mx-auto" style={{ color: "#64748B" }}>
-            Tell us your profile and goals. Claude will search the web for real, current data and build your personalized college list with reach, match, and safety schools.
+            Tell us your profile and goals, and get a personalized college list with reach, match, and safety schools.
           </p>
         </div>
 
@@ -556,10 +556,10 @@ export default function CollegesPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold" style={{ color: "#F0F4FF" }}>
-                  Searching for {form.name ? `${form.name}'s` : "your"} best college matches…
+                  Finding {form.name ? `${form.name}'s` : "your"} best college matches…
                 </p>
                 <p className="text-xs" style={{ color: "#475569" }}>
-                  Claude is searching the web for real data — usually takes 20–40 seconds
+                  This usually takes 15–30 seconds
                 </p>
               </div>
             </div>

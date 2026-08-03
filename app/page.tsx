@@ -19,7 +19,7 @@ const FEATURES = [
   {
     icon: `<path d="M13 10V3L4 14h7v7l9-11h-7z"/>`,
     title: "AI-Powered in Seconds",
-    description: "Powered by Claude AI — not templates. Every plan is generated fresh from your actual profile, not a generic checklist.",
+    description: "AI-powered, not templates. Every plan is generated fresh from your actual profile, not a generic checklist.",
     accent: { bg: "rgba(52,211,153,0.1)", border: "rgba(52,211,153,0.22)", text: "#34D399", glow: "rgba(52,211,153,0.15)" },
   },
   {
@@ -32,7 +32,7 @@ const FEATURES = [
 
 const STATS = [
   { value: "4-Year", label: "Personalized Roadmap" },
-  { value: "Claude AI", label: "Powered By" },
+  { value: "AI-Powered", label: "Fully Personalized" },
   { value: "7 Sections", label: "Comprehensive Plan" },
   { value: "Free", label: "To Get Started" },
 ];
@@ -129,7 +129,7 @@ export default function HomePage() {
                 <a href="#features" className="btn-ghost text-base px-7 py-3.5">See How It Works</a>
               </div>
               <p className="mt-6 text-xs" style={{ color: "#475569" }}>
-                No account required · Results in under 30 seconds · Powered by Claude AI
+                No account required · Results in under 30 seconds · AI-powered
               </p>
             </div>
             <OrbitalHero />
@@ -199,7 +199,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { step: "01", title: "Fill Your Profile", desc: "Share your grade, GPA, intended major, and goals. Takes about 2 minutes.", color: "#4F46E5" },
-              { step: "02", title: "AI Builds Your Plan", desc: "Claude analyzes your profile and generates a comprehensive, personalized academic roadmap.", color: "#38BDF8" },
+              { step: "02", title: "AI Builds Your Plan", desc: "Our AI analyzes your profile and generates a comprehensive, personalized academic roadmap.", color: "#38BDF8" },
               { step: "03", title: "Take Action", desc: "Follow your 90-day action items, course recommendations, and college strategy.", color: "#34D399" },
             ].map((item) => (
               <div key={item.step} className="text-center px-4">

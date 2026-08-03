@@ -280,7 +280,7 @@ function ChatBox() {
           </svg>
         </div>
         <div>
-          <p className="text-sm font-semibold" style={{ color: "#F0F4FF" }}>Ask Claude a Question</p>
+          <p className="text-sm font-semibold" style={{ color: "#F0F4FF" }}>Ask a Question</p>
           <p className="text-xs" style={{ color: "#475569" }}>Get personalized college planning advice</p>
         </div>
         <div className="ml-auto flex items-center gap-1.5">
@@ -530,7 +530,7 @@ export default function ResourcesPage() {
               Still have questions?
             </h2>
             <p className="text-sm" style={{ color: "#64748B" }}>
-              Ask Claude anything about college planning — SAT scores, AP classes, essays, financial aid, and more.
+              Ask our AI anything about college planning — SAT scores, AP classes, essays, financial aid, and more.
             </p>
           </div>
           <ChatBox />
