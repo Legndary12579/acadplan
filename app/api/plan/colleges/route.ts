@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
       contents: buildPrompt(body),
       config: {
         systemInstruction: SYSTEM_PROMPT,
-        maxOutputTokens: 4096,
+        maxOutputTokens: 8192,
       },
     });
 
@@ -109,7 +109,20 @@ export async function POST(request: NextRequest) {
 
     // Parse JSON — strip any accidental markdown fences
     const cleaned = rawText.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(cleaned);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (parseErr) {
+      console.error("[API /colleges] JSON parse failed. Raw text length:", rawText.length, "First 200 chars:", rawText.slice(0, 200), "Last 200 chars:", rawText.slice(-200));
+      return NextResponse.json(
+        {
+          error: "Gemini returned malformed JSON. Please try again — this can happen if the response is cut off.",
+          details: parseErr instanceof Error ? parseErr.message : "Unknown parse error",
+        },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json(parsed, { status: 200 });
   } catch (err: unknown) {
