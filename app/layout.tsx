@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: {
@@ -55,11 +56,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </nav>
 
               <p className="text-xs" style={{ color: "#475569" }}>
-                © {new Date().getFullYear()} AcadPlan. Powered by Claude AI.
+                © {new Date().getFullYear()} AcadPlan. Powered by AI.
               </p>
             </div>
           </div>
         </footer>
+
+        <Analytics />
       </body>
     </html>
   );
