@@ -35,7 +35,9 @@ When given a student profile, return a JSON object with this exact structure —
       "avgGPA": "3.9",
       "avgSAT": "1450-1550",
       "tuition": "$58,000/year",
-      "tagline": "One sentence on why this fits the student"
+      "tagline": "One sentence on why this fits the student",
+      "autoAdmitEligible": true | false,
+      "autoAdmitNote": "Short note if applicable, e.g. 'Guaranteed admission — you're in the top 5% required for UT Austin auto-admit.' Omit or leave empty string if not applicable."
     }
   ],
   "deepDives": [
@@ -52,7 +54,18 @@ When given a student profile, return a JSON object with this exact structure —
   ]
 }
 
-Include 7-10 schools total: 2-3 reach, 3-4 match, 2-3 safety. Use your general knowledge to provide realistic acceptance rates, tuition, and program info, and note in the tagline/deepDive fields where relevant that exact current figures should be verified on the school's official site. Tailor everything to the student's specific major, GPA, test scores, and goals. Return ONLY the JSON object, nothing else.`;
+Include 7-10 schools total: 2-3 reach, 3-4 match, 2-3 safety. Use your general knowledge to provide realistic acceptance rates, tuition, and program info, and note in the tagline/deepDive fields where relevant that exact current figures should be verified on the school's official site. Tailor everything to the student's specific major, GPA, test scores, and goals.
+
+TEXAS AUTOMATIC ADMISSION RULES (only apply these if the student profile indicates they are a Texas resident with a class rank percentile provided):
+- Texas state law guarantees automatic admission to ANY Texas public university for in-state students who rank in the top 10% of their graduating class.
+- Texas A&M University specifically uses this general top 10% threshold for automatic admission.
+- The University of Texas at Austin sets a STRICTER threshold than the general state law: as of the Fall 2026 admissions cycle onward, UT Austin's auto-admit cutoff is the top 5% (this has been progressively tightening from 6% in recent years — mention this is the current known cutoff and to verify on UT's site since it can change annually).
+- Auto-admit guarantees a spot at the university, NOT a specific major — competitive/limited programs (e.g. Computer Science, Engineering, Business, Nursing) often still require separate holistic review even for auto-admitted students. Mention this caveat when relevant.
+- If the student's percentile qualifies them for auto-admit at a Texas public university you include in the list, set "autoAdmitEligible": true and write a specific "autoAdmitNote" explaining which rule applies (general 10% law vs. UT Austin's 5%) and the major-specific caveat above.
+- If the student is not a Texas resident, or didn't provide class rank, do not include autoAdmitEligible/autoAdmitNote fields (or set autoAdmitEligible to false).
+- Only mark Texas PUBLIC universities as auto-admit eligible — never private Texas schools (e.g. Rice, SMU, Baylor, TCU do not offer this).
+
+Return ONLY the JSON object, nothing else.`;
 
 function buildPrompt(data: {
   name: string;
@@ -63,7 +76,24 @@ function buildPrompt(data: {
   collegeType: string;
   location: string;
   interests: string;
+  isTexasResident?: boolean;
+  classRank?: string;
+  classSize?: string;
 }): string {
+  let texasSection = "";
+  if (data.isTexasResident && data.classRank && data.classSize && Number(data.classSize) > 0) {
+    const percentile = (Number(data.classRank) / Number(data.classSize)) * 100;
+    texasSection = `
+
+Texas Residency: Yes
+Class Rank: ${data.classRank} out of ${data.classSize} (top ${percentile.toFixed(1)}% of class)
+Please evaluate Texas public university auto-admit eligibility per the rules in your system instructions, and include relevant Texas public universities in the list if they're a good fit, clearly flagging auto-admit eligibility.`;
+  } else if (data.isTexasResident) {
+    texasSection = `
+
+Texas Residency: Yes (class rank not provided, so auto-admit eligibility cannot be determined — do not guess)`;
+  }
+
   return `Find the best college matches for this student and return the JSON:
 
 Name: ${data.name}
@@ -73,7 +103,7 @@ ACT Score: ${data.actScore || "Not taken"}
 Intended Major: ${data.intendedMajor}
 Target College Type: ${data.collegeType}
 Home Location: ${data.location}
-Special Interests / Notes: ${data.interests || "None"}
+Special Interests / Notes: ${data.interests || "None"}${texasSection}
 
 Make sure the mix includes reach, match, and safety schools appropriate for a student with GPA ${data.gpa}${data.satScore ? ` and SAT ${data.satScore}` : ""}.`;
 }

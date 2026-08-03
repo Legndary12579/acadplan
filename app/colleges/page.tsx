@@ -13,6 +13,8 @@ interface CollegeQuick {
   avgSAT: string;
   tuition: string;
   tagline: string;
+  autoAdmitEligible?: boolean;
+  autoAdmitNote?: string;
 }
 
 interface CollegeDeep {
@@ -40,6 +42,9 @@ interface FormData {
   collegeType: string;
   location: string;
   interests: string;
+  isTexasResident: boolean;
+  classRank: string;
+  classSize: string;
 }
 
 const EMPTY_FORM: FormData = {
@@ -51,6 +56,9 @@ const EMPTY_FORM: FormData = {
   collegeType: "",
   location: "",
   interests: "",
+  isTexasResident: false,
+  classRank: "",
+  classSize: "",
 };
 
 const TIER_CONFIG = {
@@ -114,6 +122,14 @@ function CollegeCard({
               >
                 {tier.label}
               </span>
+              {college.autoAdmitEligible && (
+                <span
+                  className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: "rgba(52,211,153,0.12)", border: "1px solid rgba(52,211,153,0.3)", color: "#34D399" }}
+                >
+                  🎓 Auto-Admit Eligible
+                </span>
+              )}
             </div>
             <h3
               className="text-base font-bold"
@@ -154,6 +170,12 @@ function CollegeCard({
         <p className="text-xs leading-relaxed mb-4" style={{ color: "#64748B" }}>
           {college.tagline}
         </p>
+
+        {college.autoAdmitNote && (
+          <p className="text-xs leading-relaxed mb-4" style={{ color: "#34D399" }}>
+            🎓 {college.autoAdmitNote}
+          </p>
+        )}
 
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium" style={{ color: "#475569" }}>
@@ -276,7 +298,7 @@ export default function CollegesPage() {
   const [result, setResult] = useState<CollegeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function update(field: keyof FormData, value: string) {
+  function update(field: keyof FormData, value: string | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
@@ -400,6 +422,67 @@ export default function CollegesPage() {
                   <label className="form-label">Special Interests / Notes</label>
                   <input type="text" className="form-input" placeholder="e.g. strong research, small campus, warm weather" value={form.interests} onChange={(e) => update("interests", e.target.value)} />
                 </div>
+
+                <div className="md:col-span-2 flex flex-col gap-1.5">
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={form.isTexasResident}
+                      onChange={(e) => update("isTexasResident", e.target.checked)}
+                      className="w-4 h-4 rounded"
+                    />
+                    <span className="form-label !mb-0">I'm a Texas resident (check auto-admit eligibility)</span>
+                  </label>
+                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                    Texas law guarantees admission to Texas public universities for in-state students in the top 10% of their class — some schools (like UT Austin) set a stricter cutoff.
+                  </p>
+                </div>
+
+                {form.isTexasResident && (
+                  <>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="form-label">Class Rank</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        className="form-input"
+                        placeholder="e.g. 15"
+                        value={form.classRank}
+                        onChange={(e) => update("classRank", e.target.value.replace(/[^0-9]/g, ""))}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="form-label">Graduating Class Size</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        className="form-input"
+                        placeholder="e.g. 450"
+                        value={form.classSize}
+                        onChange={(e) => update("classSize", e.target.value.replace(/[^0-9]/g, ""))}
+                      />
+                    </div>
+
+                    {form.classRank && form.classSize && Number(form.classSize) > 0 && (
+                      <div className="md:col-span-2 px-4 py-3 rounded-xl text-sm" style={{ background: "rgba(79,70,229,0.1)", border: "1px solid rgba(79,70,229,0.25)", color: "#A5B4FC" }}>
+                        {(() => {
+                          const percentile = (Number(form.classRank) / Number(form.classSize)) * 100;
+                          return (
+                            <>
+                              You're in the top <strong>{percentile.toFixed(1)}%</strong> of your class.{" "}
+                              {percentile <= 5
+                                ? "This likely qualifies you for automatic admission to UT Austin and most Texas public universities."
+                                : percentile <= 10
+                                ? "This likely qualifies you for automatic admission to Texas A&M and most Texas public universities (UT Austin's cutoff is stricter, currently top 5%)."
+                                : "This is above the general 10% auto-admit cutoff for Texas public universities, though some schools may still offer other guaranteed-admission pathways — worth checking each school directly."}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
 
@@ -422,7 +505,7 @@ export default function CollegesPage() {
                     <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeOpacity="0.25" />
                     <path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" />
                   </svg>
-                  Claude is searching for your best matches…
+                  Finding your best matches…
                 </>
               ) : (
                 <>
