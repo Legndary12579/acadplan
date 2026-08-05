@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { saveStudentPlan } from "@/lib/supabase";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 import type { PlanRequest, PlanResponse, ApiError } from "@/types";
+
+// 5 plan generations per IP per hour — this is the most expensive route
+const RATE_LIMIT = 5;
+const RATE_WINDOW_MINUTES = 60;
 
 const GEMINI_MODEL = "gemini-3.5-flash";
 
@@ -84,6 +89,19 @@ Please provide a detailed, personalized plan that addresses ${student.name}'s sp
 // ── POST Handler ───────────────────────────────────────────
 export async function POST(request: NextRequest) {
   try {
+    const clientIp = getClientIp(request);
+    const rateCheck = await checkRateLimit(clientIp, "plan", RATE_LIMIT, RATE_WINDOW_MINUTES);
+
+    if (!rateCheck.allowed) {
+      const minutes = Math.ceil((rateCheck.retryAfterSeconds ?? 3600) / 60);
+      return NextResponse.json<ApiError>(
+        {
+          error: `You've reached the limit of ${RATE_LIMIT} plan generations per hour. Please try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+        },
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds ?? 3600) } }
+      );
+    }
+
     let body: PlanRequest;
     try {
       body = await request.json();

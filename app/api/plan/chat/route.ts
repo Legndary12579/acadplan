@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 const GEMINI_MODEL = "gemini-3.5-flash";
+
+// More generous since chat is cheap and conversational — 30 messages/hour
+const RATE_LIMIT = 30;
+const RATE_WINDOW_MINUTES = 60;
+// Cap history size so a client can't send unbounded conversation length
+const MAX_MESSAGES = 20;
 
 let genAI: GoogleGenAI | null = null;
 function getGenAI(): GoogleGenAI {
@@ -33,10 +40,30 @@ Keep your answers concise, encouraging, and specific. Use bullet points when lis
 
 export async function POST(request: NextRequest) {
   try {
+    const clientIp = getClientIp(request);
+    const rateCheck = await checkRateLimit(clientIp, "chat", RATE_LIMIT, RATE_WINDOW_MINUTES);
+
+    if (!rateCheck.allowed) {
+      const minutes = Math.ceil((rateCheck.retryAfterSeconds ?? 3600) / 60);
+      return NextResponse.json(
+        {
+          error: `You've reached the limit of ${RATE_LIMIT} messages per hour. Please try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+        },
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds ?? 3600) } }
+      );
+    }
+
     const { messages } = await request.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: "Invalid messages format." }, { status: 400 });
+    }
+
+    if (messages.length > MAX_MESSAGES) {
+      return NextResponse.json(
+        { error: `Conversation is too long (max ${MAX_MESSAGES} messages). Please start a new conversation.` },
+        { status: 400 }
+      );
     }
 
     // Gemini expects contents as [{ role, parts: [{ text }] }],

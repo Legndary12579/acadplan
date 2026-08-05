@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 const GEMINI_MODEL = "gemini-3.5-flash";
+
+// 5 college list generations per IP per hour — expensive route
+const RATE_LIMIT = 5;
+const RATE_WINDOW_MINUTES = 60;
 
 let genAI: GoogleGenAI | null = null;
 function getGenAI(): GoogleGenAI {
@@ -114,6 +119,19 @@ Make sure the mix includes reach, match, and safety schools appropriate for a st
 
 export async function POST(request: NextRequest) {
   try {
+    const clientIp = getClientIp(request);
+    const rateCheck = await checkRateLimit(clientIp, "colleges", RATE_LIMIT, RATE_WINDOW_MINUTES);
+
+    if (!rateCheck.allowed) {
+      const minutes = Math.ceil((rateCheck.retryAfterSeconds ?? 3600) / 60);
+      return NextResponse.json(
+        {
+          error: `You've reached the limit of ${RATE_LIMIT} college searches per hour. Please try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+        },
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds ?? 3600) } }
+      );
+    }
+
     const body = await request.json();
 
     if (!body.name || !body.gpa || !body.intendedMajor) {
