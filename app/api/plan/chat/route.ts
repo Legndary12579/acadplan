@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       contents,
       config: {
         systemInstruction: SYSTEM_PROMPT,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 2048,
       },
     });
 
