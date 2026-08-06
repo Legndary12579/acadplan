@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type { DbStudentPlan, StudentProfile } from "@/types";
 
 // ── Client ─────────────────────────────────────────────────
@@ -6,6 +6,33 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+/**
+ * Builds a Supabase client scoped to a specific user's access token.
+ * Used in API routes (server-side) so that RLS policies relying on
+ * auth.uid() work correctly — the default `supabase` client above has
+ * no user session attached when called from a server route, so any
+ * insert requiring auth.uid() = user_id would otherwise be rejected.
+ */
+export function createUserScopedClient(accessToken: string): SupabaseClient {
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${accessToken}` } },
+  });
+}
+
+/**
+ * Verifies an access token and returns the real, verified user ID.
+ * Never trust a userId sent in a request body alone — always verify
+ * it against the token, since the body value could be spoofed.
+ */
+export async function verifyAccessToken(
+  accessToken: string,
+  client: SupabaseClient = supabase
+): Promise<string | null> {
+  const { data, error } = await client.auth.getUser(accessToken);
+  if (error || !data.user) return null;
+  return data.user.id;
+}
 
 // ── Auth ───────────────────────────────────────────────────
 export async function signUp(email: string, password: string) {
@@ -38,9 +65,10 @@ export async function getUser(): Promise<{ id: string; email?: string } | null> 
 export async function saveStudentPlan(
   student: StudentProfile,
   aiPlan: string,
-  userId?: string
+  userId?: string,
+  client: SupabaseClient = supabase
 ): Promise<{ data: DbStudentPlan | null; error: string | null }> {
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from("student_plans")
     .insert([
       {

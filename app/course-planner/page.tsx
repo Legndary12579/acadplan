@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import type { StudentProfile, FormState, GradeLevel, CollegeType } from "@/types";
-import { getUser } from "@/lib/supabase";
+import { getUser, getSession } from "@/lib/supabase";
 
 const EMPTY_STUDENT: StudentProfile = {
   name: "",
@@ -148,9 +148,14 @@ export default function CoursePlannerPage() {
     setFormState({ step: "loading", plan: null, error: null });
 
     try {
+      const session = await getSession();
+
       const res = await fetch("/api/plan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ student, userId: userId ?? undefined }),
       });
 
