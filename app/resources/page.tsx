@@ -368,6 +368,10 @@ function ChatBox() {
           </svg>
         </button>
       </div>
+
+      <p className="px-4 pb-3 text-[11px] text-center" style={{ color: "#3A4A63" }}>
+        AI-generated answers, not official school or admissions advice. Verify important details with your counselor or the school directly.
+      </p>
     </div>
   );
 }

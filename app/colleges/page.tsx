@@ -598,6 +598,10 @@ export default function CollegesPage() {
               </button>
             </div>
 
+            <p className="text-xs text-center" style={{ color: "#3A4A63" }}>
+              This list is AI-generated guidance, not official admissions data or professional counseling. Acceptance rates, tuition, and eligibility details may be outdated — always verify with each school's official website and your school counselor.
+            </p>
+
             {/* Reach schools */}
             {reaches.length > 0 && (
               <div>

@@ -59,6 +59,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 © {new Date().getFullYear()} AcadPlan. Powered by AI.
               </p>
             </div>
+
+            <p className="text-[11px] text-center md:text-left mt-6 pt-6 border-t border-white/5 leading-relaxed" style={{ color: "#3A4A63" }}>
+              AcadPlan is an independent, AI-powered planning tool and is not affiliated with, endorsed by, or an official resource of any high school, school district, college, university, or admissions office. Course suggestions, college matches, and other guidance are AI-generated starting points, not verified facts or official recommendations, and may contain errors or outdated information. Always confirm course availability, graduation requirements, and admissions details with your school counselor and each college's official website before making decisions.
+            </p>
           </div>
         </footer>
 
