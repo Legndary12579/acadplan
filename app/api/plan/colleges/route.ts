@@ -85,7 +85,8 @@ function buildPrompt(data: {
   collegeType: string;
   zipCode: string;
   interests: string;
-  awardsHonorsEcs?: string;
+  awardsHonors?: string;
+  extracurriculars?: string[];
   isTexasResident?: boolean;
   classRank?: string;
   classSize?: string;
@@ -114,7 +115,8 @@ Intended Major: ${data.intendedMajor}
 Target College Type: ${data.collegeType}
 ZIP Code: ${data.zipCode || "Not specified"}
 Special Interests / Notes: ${data.interests || "None"}
-Awards, Honors & Extracurriculars: ${data.awardsHonorsEcs || "None listed"}${texasSection}
+Awards & Honors: ${data.awardsHonors || "None listed"}
+Extracurricular Activities: ${(data.extracurriculars ?? []).filter((a) => a.trim()).join(", ") || "None listed"}${texasSection}
 
 Give the awards/honors/extracurriculars meaningful weight alongside GPA and test scores when judging fit — more than a passing mention, but stay realistic rather than letting strong ECs fully offset stats that are well below a school's typical range. Use them to inform "whyItFits", "applicationTips", and how competitive the student realistically is for selective programs, especially for schools/majors that don't use auto-admit or where auto-admit only guarantees the university, not the specific program.
 

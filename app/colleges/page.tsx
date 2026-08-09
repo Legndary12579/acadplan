@@ -44,7 +44,8 @@ interface FormData {
   collegeType: string;
   zipCode: string;
   interests: string;
-  awardsHonorsEcs: string;
+  awardsHonors: string;
+  extracurriculars: string[];
   isTexasResident: boolean;
   classRank: string;
   classSize: string;
@@ -61,7 +62,8 @@ const EMPTY_FORM: FormData = {
   collegeType: "",
   zipCode: "",
   interests: "",
-  awardsHonorsEcs: "",
+  awardsHonors: "",
+  extracurriculars: [""],
   isTexasResident: false,
   classRank: "",
   classSize: "",
@@ -308,6 +310,25 @@ export default function CollegesPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  function updateActivity(index: number, value: string) {
+    setForm((prev) => {
+      const next = [...prev.extracurriculars];
+      next[index] = value;
+      return { ...prev, extracurriculars: next };
+    });
+  }
+
+  function addActivity() {
+    setForm((prev) => ({ ...prev, extracurriculars: [...prev.extracurriculars, ""] }));
+  }
+
+  function removeActivity(index: number) {
+    setForm((prev) => {
+      const next = prev.extracurriculars.filter((_, i) => i !== index);
+      return { ...prev, extracurriculars: next.length > 0 ? next : [""] };
+    });
+  }
+
   function isValid() {
     return form.name.trim() && form.gpaUnweighted.trim() && form.intendedMajor.trim() && form.collegeType;
   }
@@ -448,15 +469,56 @@ export default function CollegesPage() {
                 </div>
 
                 <div className="md:col-span-2 flex flex-col gap-1.5">
-                  <label className="form-label">Awards, Honors & Extracurriculars</label>
+                  <label className="form-label">Awards & Honors</label>
                   <textarea
                     className="form-input resize-none"
-                    rows={3}
-                    placeholder="e.g. National Merit Semifinalist, Varsity Debate Captain, Eagle Scout, robotics club president, 200+ volunteer hours at local hospital…"
-                    value={form.awardsHonorsEcs}
-                    onChange={(e) => update("awardsHonorsEcs", e.target.value)}
+                    rows={2}
+                    placeholder="e.g. National Merit Semifinalist, Eagle Scout, AP Scholar with Distinction…"
+                    value={form.awardsHonors}
+                    onChange={(e) => update("awardsHonors", e.target.value)}
                   />
-                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                </div>
+
+                <div className="md:col-span-2 flex flex-col gap-1.5">
+                  <label className="form-label">Extracurricular Activities</label>
+                  <div className="flex flex-col gap-2">
+                    {form.extracurriculars.map((activity, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          className="form-input flex-1"
+                          placeholder="e.g. Varsity Debate Captain, Robotics Club President…"
+                          value={activity}
+                          onChange={(e) => updateActivity(i, e.target.value)}
+                        />
+                        {form.extracurriculars.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeActivity(i)}
+                            className="w-9 h-9 flex-shrink-0 rounded-lg flex items-center justify-center transition-colors"
+                            style={{ color: "#64748B" }}
+                            aria-label="Remove activity"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addActivity}
+                    className="flex items-center gap-1.5 text-sm font-medium mt-1 self-start px-3 py-1.5 rounded-lg transition-colors"
+                    style={{ color: "#818CF8", background: "rgba(129,140,248,0.08)" }}
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Add Activity
+                  </button>
+                  <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
                     Optional, but helps tailor recommendations — especially for competitive majors where auto-admit only guarantees the school, not the program.
                   </p>
                 </div>
