@@ -387,18 +387,41 @@ function AccordionItem({ q, a }: { q: string; a: string }) {
       >
         <span className="text-sm font-semibold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{q}</span>
         <svg
-          className="w-4 h-4 flex-shrink-0 transition-transform duration-300"
-          style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", color: "#818CF8" }}
+          className="w-4 h-4 flex-shrink-0"
+          style={{
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            color: "#818CF8",
+            transition: "transform 400ms cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
         >
           <path d="m6 9 6 6 6-6"/>
         </svg>
       </button>
-      {open && (
-        <div className="px-6 pb-5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-          <p className="text-sm leading-relaxed pt-4" style={{ color: "#94A3B8" }}>{a}</p>
+      {/* Grid-rows trick animates height smoothly without measuring
+          content — content stays mounted (not conditionally rendered)
+          so the transition has something to animate between. */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateRows: open ? "1fr" : "0fr",
+          transition: "grid-template-rows 400ms cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
+        <div style={{ overflow: "hidden" }}>
+          <div
+            className="px-6 pb-5"
+            style={{
+              borderTop: "1px solid rgba(255,255,255,0.05)",
+              opacity: open ? 1 : 0,
+              transition: "opacity 300ms ease",
+              transitionDelay: open ? "100ms" : "0ms",
+            }}
+          >
+            <p className="text-sm leading-relaxed pt-4" style={{ color: "#94A3B8" }}>{a}</p>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
