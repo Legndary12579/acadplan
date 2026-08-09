@@ -8,14 +8,16 @@ const EMPTY_STUDENT: StudentProfile = {
   name: "",
   email: "",
   gradeLevel: "",
-  gpa: "",
+  gpaUnweighted: "",
+  gpaWeighted: "",
   intendedMajor: "",
   collegeType: "",
   extracurriculars: "",
   careerGoals: "",
   challenges: "",
-  location: "",
+  zipCode: "",
   satScore: "",
+  satSuperscore: "",
   actScore: "",
 };
 
@@ -134,7 +136,7 @@ export default function CoursePlannerPage() {
       student.name.trim() &&
       student.email.trim() &&
       student.gradeLevel &&
-      student.gpa.trim() &&
+      student.gpaUnweighted.trim() &&
       student.intendedMajor.trim() &&
       student.collegeType &&
       student.careerGoals.trim()
@@ -225,8 +227,16 @@ export default function CoursePlannerPage() {
                 <FieldGroup label="Email Address *">
                   <input type="email" className="form-input" placeholder="alex@email.com" value={student.email} onChange={(e) => update("email", e.target.value)} required />
                 </FieldGroup>
-                <FieldGroup label="Your Location *" hint="City and state, or zip code — used to find local opportunities">
-                  <input type="text" className="form-input" placeholder="e.g. Austin, TX or 78701" value={student.location} onChange={(e) => update("location", e.target.value)} />
+                <FieldGroup label="ZIP Code *" hint="Used to find local opportunities">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    className="form-input"
+                    placeholder="e.g. 78701"
+                    value={student.zipCode}
+                    onChange={(e) => update("zipCode", e.target.value.replace(/[^0-9]/g, "").slice(0, 5))}
+                    maxLength={5}
+                  />
                 </FieldGroup>
               </div>
             </div>
@@ -255,8 +265,11 @@ export default function CoursePlannerPage() {
                     <option value="12th">12th Grade (Senior)</option>
                   </select>
                 </FieldGroup>
-                <FieldGroup label="Current GPA *" hint="Unweighted, out of 4.0">
-                  <input type="text" className="form-input" placeholder="e.g. 3.7" value={student.gpa} onChange={(e) => update("gpa", e.target.value)} required maxLength={4} />
+                <FieldGroup label="Unweighted GPA *" hint="Out of 4.0">
+                  <input type="text" className="form-input" placeholder="e.g. 3.7" value={student.gpaUnweighted} onChange={(e) => update("gpaUnweighted", e.target.value)} required maxLength={4} />
+                </FieldGroup>
+                <FieldGroup label="Weighted GPA" hint="Optional — often out of 5.0">
+                  <input type="text" className="form-input" placeholder="e.g. 4.3" value={student.gpaWeighted} onChange={(e) => update("gpaWeighted", e.target.value)} maxLength={4} />
                 </FieldGroup>
                 <FieldGroup label="Intended Major / Field *">
                   <input type="text" className="form-input" placeholder="e.g. Computer Science, Pre-Med, Business" value={student.intendedMajor} onChange={(e) => update("intendedMajor", e.target.value)} required />
@@ -271,8 +284,11 @@ export default function CoursePlannerPage() {
                     <option value="undecided">Undecided</option>
                   </select>
                 </FieldGroup>
-                <FieldGroup label="SAT Score" hint="Optional — leave blank if not taken">
+                <FieldGroup label="SAT Score" hint="Optional — most recent single test date">
                   <input type="text" className="form-input" placeholder="e.g. 1350" value={student.satScore} onChange={(e) => update("satScore", e.target.value)} maxLength={4} />
+                </FieldGroup>
+                <FieldGroup label="SAT Superscore" hint="Optional — best section scores combined across sittings">
+                  <input type="text" className="form-input" placeholder="e.g. 1420" value={student.satSuperscore} onChange={(e) => update("satSuperscore", e.target.value)} maxLength={4} />
                 </FieldGroup>
                 <FieldGroup label="ACT Score" hint="Optional — leave blank if not taken">
                   <input type="text" className="form-input" placeholder="e.g. 29" value={student.actScore} onChange={(e) => update("actScore", e.target.value)} maxLength={2} />

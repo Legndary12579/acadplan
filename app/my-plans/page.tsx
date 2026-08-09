@@ -148,8 +148,8 @@ export default function MyPlansPage() {
                   {plan.intended_major}
                 </h3>
                 <p className="text-sm mb-3" style={{ color: "#64748B" }}>
-                  {plan.grade_level} Grade · GPA {plan.gpa}
-                  {plan.location && ` · ${plan.location}`}
+                  {plan.grade_level} Grade · GPA {plan.gpa}{plan.gpa_weighted && ` (${plan.gpa_weighted} weighted)`}
+                  {plan.location && ` · ZIP ${plan.location}`}
                 </p>
                 <span className="text-xs font-semibold" style={{ color: "#818CF8" }}>
                   View full plan →

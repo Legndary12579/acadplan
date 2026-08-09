@@ -73,14 +73,15 @@ function buildUserPrompt(req: PlanRequest): string {
 
 **Name:** ${student.name}
 **Current Grade:** ${student.gradeLevel} Grade
-**GPA:** ${student.gpa}
+**GPA:** ${student.gpaUnweighted} unweighted${student.gpaWeighted ? ` (${student.gpaWeighted} weighted)` : ""}
 **Intended Major / Field of Study:** ${student.intendedMajor}
 **Target College Type:** ${collegeTypeLabel[student.collegeType] ?? student.collegeType}
-**Location:** ${student.location || "Not specified"}
+**ZIP Code:** ${student.zipCode || "Not specified"}
 **Extracurricular Activities:** ${student.extracurriculars || "None listed"}
 **Career Goals:** ${student.careerGoals}
 **Current Challenges / Concerns:** ${student.challenges || "None listed"}
 ${student.satScore ? `**SAT Score:** ${student.satScore}` : ""}
+${student.satSuperscore ? `**SAT Superscore:** ${student.satSuperscore}` : ""}
 ${student.actScore ? `**ACT Score:** ${student.actScore}` : ""}
 
 Please provide a detailed, personalized plan that addresses ${student.name}'s specific situation.`;

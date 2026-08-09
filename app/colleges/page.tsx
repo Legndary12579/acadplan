@@ -35,12 +35,14 @@ interface CollegeResult {
 
 interface FormData {
   name: string;
-  gpa: string;
+  gpaUnweighted: string;
+  gpaWeighted: string;
   satScore: string;
+  satSuperscore: string;
   actScore: string;
   intendedMajor: string;
   collegeType: string;
-  location: string;
+  zipCode: string;
   interests: string;
   awardsHonorsEcs: string;
   isTexasResident: boolean;
@@ -50,12 +52,14 @@ interface FormData {
 
 const EMPTY_FORM: FormData = {
   name: "",
-  gpa: "",
+  gpaUnweighted: "",
+  gpaWeighted: "",
   satScore: "",
+  satSuperscore: "",
   actScore: "",
   intendedMajor: "",
   collegeType: "",
-  location: "",
+  zipCode: "",
   interests: "",
   awardsHonorsEcs: "",
   isTexasResident: false,
@@ -305,7 +309,7 @@ export default function CollegesPage() {
   }
 
   function isValid() {
-    return form.name.trim() && form.gpa.trim() && form.intendedMajor.trim() && form.collegeType;
+    return form.name.trim() && form.gpaUnweighted.trim() && form.intendedMajor.trim() && form.collegeType;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -384,8 +388,13 @@ export default function CollegesPage() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="form-label">Current GPA *</label>
-                  <input type="text" className="form-input" placeholder="e.g. 3.8" value={form.gpa} onChange={(e) => update("gpa", e.target.value)} required maxLength={4} />
+                  <label className="form-label">Unweighted GPA *</label>
+                  <input type="text" className="form-input" placeholder="e.g. 3.8" value={form.gpaUnweighted} onChange={(e) => update("gpaUnweighted", e.target.value)} required maxLength={4} />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="form-label">Weighted GPA</label>
+                  <input type="text" className="form-input" placeholder="e.g. 4.4" value={form.gpaWeighted} onChange={(e) => update("gpaWeighted", e.target.value)} maxLength={4} />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -411,13 +420,26 @@ export default function CollegesPage() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
+                  <label className="form-label">SAT Superscore</label>
+                  <input type="text" className="form-input" placeholder="e.g. 1450" value={form.satSuperscore} onChange={(e) => update("satSuperscore", e.target.value)} maxLength={4} />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
                   <label className="form-label">ACT Score</label>
                   <input type="text" className="form-input" placeholder="e.g. 31" value={form.actScore} onChange={(e) => update("actScore", e.target.value)} maxLength={2} />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="form-label">Your Location</label>
-                  <input type="text" className="form-input" placeholder="e.g. Austin, TX" value={form.location} onChange={(e) => update("location", e.target.value)} />
+                  <label className="form-label">ZIP Code</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    className="form-input"
+                    placeholder="e.g. 78701"
+                    value={form.zipCode}
+                    onChange={(e) => update("zipCode", e.target.value.replace(/[^0-9]/g, "").slice(0, 5))}
+                    maxLength={5}
+                  />
                 </div>
 
                 <div className="flex flex-col gap-1.5">

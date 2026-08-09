@@ -3,14 +3,16 @@ export interface StudentProfile {
   name: string;
   email: string;
   gradeLevel: GradeLevel;
-  gpa: string;
+  gpaUnweighted: string;
+  gpaWeighted?: string;
   intendedMajor: string;
   collegeType: CollegeType;
   extracurriculars: string;
   careerGoals: string;
   challenges: string;
-  location: string;
+  zipCode: string;
   satScore?: string;
+  satSuperscore?: string;
   actScore?: string;
 }
 
@@ -79,12 +81,14 @@ export interface DbStudentPlan {
   student_email: string;
   grade_level: GradeLevel;
   gpa: string;
+  gpa_weighted: string | null;
   intended_major: string;
   college_type: CollegeType;
   extracurriculars: string;
   career_goals: string;
   challenges: string;
   sat_score: string | null;
+  sat_superscore: string | null;
   act_score: string | null;
   location: string | null;
   ai_plan: string;

@@ -61,6 +61,8 @@ When given a student profile, return a JSON object with this exact structure —
 
 Include 7-10 schools total: 2-3 reach, 3-4 match, 2-3 safety. Use your general knowledge to provide realistic acceptance rates, tuition, and program info, and note in the tagline/deepDive fields where relevant that exact current figures should be verified on the school's official site. Tailor everything to the student's specific major, GPA, test scores, and goals.
 
+When assigning reach/match/safety tiers, weigh the student's extracurriculars, awards, and honors as heavily as GPA and test scores — not as a minor tiebreaker. Holistic admissions genuinely reward strong ECs and leadership; a student with excellent activities but slightly lower stats can realistically reach schools that pure numbers would rule out, and the reverse (high stats, thin activities) should temper how "safe" a selective school really is. Reflect this nuance in the tier assignment and in the "whyItFits" reasoning, don't default to GPA/SAT-only tiering.
+
 TEXAS AUTOMATIC ADMISSION RULES (only apply these if the student profile indicates they are a Texas resident with a class rank percentile provided):
 - Texas state law guarantees automatic admission to ANY Texas public university for in-state students who rank in the top 10% of their graduating class.
 - Texas A&M University specifically uses this general top 10% threshold for automatic admission.
@@ -74,12 +76,14 @@ Return ONLY the JSON object, nothing else.`;
 
 function buildPrompt(data: {
   name: string;
-  gpa: string;
+  gpaUnweighted: string;
+  gpaWeighted?: string;
   satScore: string;
+  satSuperscore?: string;
   actScore: string;
   intendedMajor: string;
   collegeType: string;
-  location: string;
+  zipCode: string;
   interests: string;
   awardsHonorsEcs?: string;
   isTexasResident?: boolean;
@@ -103,18 +107,18 @@ Texas Residency: Yes (class rank not provided, so auto-admit eligibility cannot 
   return `Find the best college matches for this student and return the JSON:
 
 Name: ${data.name}
-GPA: ${data.gpa}
-SAT Score: ${data.satScore || "Not taken"}
+GPA: ${data.gpaUnweighted} unweighted${data.gpaWeighted ? ` (${data.gpaWeighted} weighted)` : ""}
+SAT Score: ${data.satScore || "Not taken"}${data.satSuperscore ? ` (Superscore: ${data.satSuperscore})` : ""}
 ACT Score: ${data.actScore || "Not taken"}
 Intended Major: ${data.intendedMajor}
 Target College Type: ${data.collegeType}
-Home Location: ${data.location}
+ZIP Code: ${data.zipCode || "Not specified"}
 Special Interests / Notes: ${data.interests || "None"}
 Awards, Honors & Extracurriculars: ${data.awardsHonorsEcs || "None listed"}${texasSection}
 
-Use the awards/honors/extracurriculars to inform "whyItFits", "applicationTips", and how competitive the student is for selective programs — this matters especially for schools/majors that don't use auto-admit or where auto-admit only guarantees the university, not the specific program.
+Weigh the awards/honors/extracurriculars heavily alongside GPA and test scores — not just as a tiebreaker. Use them to inform "whyItFits", "applicationTips", and how competitive the student realistically is for selective programs, especially for schools/majors that don't use auto-admit or where auto-admit only guarantees the university, not the specific program. A student with strong ECs/awards but slightly lower stats can be a great fit for a more selective school than stats alone would suggest — reflect that in the tier assignment (reach/match/safety), not just raw numbers.
 
-Make sure the mix includes reach, match, and safety schools appropriate for a student with GPA ${data.gpa}${data.satScore ? ` and SAT ${data.satScore}` : ""}.`;
+Make sure the mix includes reach, match, and safety schools appropriate for this student's full profile — stats AND activities — not GPA/SAT alone.`;
 }
 
 export async function POST(request: NextRequest) {
@@ -134,9 +138,9 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    if (!body.name || !body.gpa || !body.intendedMajor) {
+    if (!body.name || !body.gpaUnweighted || !body.intendedMajor) {
       return NextResponse.json(
-        { error: "Missing required fields: name, gpa, intendedMajor." },
+        { error: "Missing required fields: name, gpaUnweighted, intendedMajor." },
         { status: 400 }
       );
     }
