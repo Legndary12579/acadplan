@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { MarkdownText } from "@/components/MarkdownText";
 
 // ── Data ───────────────────────────────────────────────────
 const YEARLY_ROADMAP = [
@@ -330,7 +331,7 @@ function ChatBox() {
                 : { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "#94A3B8", borderBottomLeftRadius: "4px" }
               }
             >
-              {msg.content}
+              {msg.role === "assistant" ? <MarkdownText text={msg.content} /> : msg.content}
             </div>
           </div>
         ))}

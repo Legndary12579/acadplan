@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { InlineMarkdown } from "@/components/MarkdownText";
 
 // ── Types ──────────────────────────────────────────────────
 interface CollegeQuick {
@@ -177,12 +178,12 @@ function CollegeCard({
         </div>
 
         <p className="text-xs leading-relaxed mb-4" style={{ color: "#64748B" }}>
-          {college.tagline}
+          <InlineMarkdown text={college.tagline} />
         </p>
 
         {college.autoAdmitNote && (
           <p className="text-xs leading-relaxed mb-4" style={{ color: "#34D399" }}>
-            🎓 {college.autoAdmitNote}
+            🎓 <InlineMarkdown text={college.autoAdmitNote} />
           </p>
         )}
 
@@ -220,7 +221,7 @@ function CollegeCard({
             <h4 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#4F46E5" }}>
               Why It Fits You
             </h4>
-            <p className="text-sm leading-relaxed" style={{ color: "#94A3B8" }}>{deep.whyItFits}</p>
+            <p className="text-sm leading-relaxed" style={{ color: "#94A3B8" }}><InlineMarkdown text={deep.whyItFits} /></p>
           </div>
 
           {/* Notable programs */}
@@ -250,7 +251,7 @@ function CollegeCard({
               {deep.strengths.map((s) => (
                 <div key={s} className="flex items-start gap-2">
                   <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#34D399" }} />
-                  <span className="text-sm" style={{ color: "#94A3B8" }}>{s}</span>
+                  <span className="text-sm" style={{ color: "#94A3B8" }}><InlineMarkdown text={s} /></span>
                 </div>
               ))}
             </div>
@@ -265,7 +266,7 @@ function CollegeCard({
               {deep.applicationTips.map((t) => (
                 <div key={t} className="flex items-start gap-2">
                   <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#FBBF24" }} />
-                  <span className="text-sm" style={{ color: "#94A3B8" }}>{t}</span>
+                  <span className="text-sm" style={{ color: "#94A3B8" }}><InlineMarkdown text={t} /></span>
                 </div>
               ))}
             </div>
@@ -277,19 +278,19 @@ function CollegeCard({
               <h4 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#818CF8" }}>
                 Financial Aid
               </h4>
-              <p className="text-xs leading-relaxed" style={{ color: "#94A3B8" }}>{deep.financialAid}</p>
+              <p className="text-xs leading-relaxed" style={{ color: "#94A3B8" }}><InlineMarkdown text={deep.financialAid} /></p>
             </div>
             <div className="rounded-xl p-4" style={{ background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.2)" }}>
               <h4 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#38BDF8" }}>
                 Key Deadlines
               </h4>
-              <p className="text-xs leading-relaxed" style={{ color: "#94A3B8" }}>{deep.deadlines}</p>
+              <p className="text-xs leading-relaxed" style={{ color: "#94A3B8" }}><InlineMarkdown text={deep.deadlines} /></p>
             </div>
             <div className="rounded-xl p-4" style={{ background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.2)" }}>
               <h4 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#34D399" }}>
                 Test Score Policy
               </h4>
-              <p className="text-xs leading-relaxed" style={{ color: "#94A3B8" }}>{deep.testScorePolicy}</p>
+              <p className="text-xs leading-relaxed" style={{ color: "#94A3B8" }}><InlineMarkdown text={deep.testScorePolicy} /></p>
             </div>
           </div>
 
@@ -298,7 +299,7 @@ function CollegeCard({
             <h4 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#F472B6" }}>
               Campus Life
             </h4>
-            <p className="text-sm leading-relaxed" style={{ color: "#94A3B8" }}>{deep.campusLife}</p>
+            <p className="text-sm leading-relaxed" style={{ color: "#94A3B8" }}><InlineMarkdown text={deep.campusLife} /></p>
           </div>
         </div>
       )}
