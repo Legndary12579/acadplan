@@ -26,6 +26,7 @@ interface CollegeDeep {
   deadlines: string;
   strengths: string[];
   campusLife: string;
+  testScorePolicy: string;
 }
 
 interface CollegeResult {
@@ -270,8 +271,8 @@ function CollegeCard({
             </div>
           </div>
 
-          {/* Financial aid + deadlines */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Financial aid + deadlines + test score policy */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="rounded-xl p-4" style={{ background: "rgba(79,70,229,0.08)", border: "1px solid rgba(79,70,229,0.2)" }}>
               <h4 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#818CF8" }}>
                 Financial Aid
@@ -283,6 +284,12 @@ function CollegeCard({
                 Key Deadlines
               </h4>
               <p className="text-xs leading-relaxed" style={{ color: "#94A3B8" }}>{deep.deadlines}</p>
+            </div>
+            <div className="rounded-xl p-4" style={{ background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.2)" }}>
+              <h4 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#34D399" }}>
+                Test Score Policy
+              </h4>
+              <p className="text-xs leading-relaxed" style={{ color: "#94A3B8" }}>{deep.testScorePolicy}</p>
             </div>
           </div>
 
@@ -754,7 +761,7 @@ export default function CollegesPage() {
 
             {/* Footer note */}
             <p className="text-xs text-center pb-4" style={{ color: "#334155" }}>
-              College data sourced via web search at time of generation. Always verify current acceptance rates and deadlines on each school's official website.
+              College data is AI-generated from general knowledge, not live web search. Always verify current acceptance rates, test score policies, and deadlines on each school's official website.
             </p>
           </div>
         )}

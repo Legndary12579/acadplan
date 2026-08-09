@@ -54,7 +54,8 @@ When given a student profile, return a JSON object with this exact structure —
       "financialAid": "General info about merit aid, need-based aid, or scholarships typically available at this type of school",
       "deadlines": "Typical: Early Decision ~Nov 1, Regular Decision ~Jan 1 (verify exact current dates on the school's site)",
       "strengths": ["Strength 1", "Strength 2", "Strength 3"],
-      "campusLife": "1-2 sentences about campus culture and student life"
+      "campusLife": "1-2 sentences about campus culture and student life",
+      "testScorePolicy": "Whether this school is test-optional, test-required, or test-blind, and whether it superscores the SAT and/or ACT (i.e. combines best section scores across multiple sittings) versus requiring a single test date's composite. Note if policy differs by SAT vs ACT. Always add that exact current policy should be verified on the school's admissions site, since these policies change year to year."
     }
   ]
 }
