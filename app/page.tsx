@@ -120,8 +120,8 @@ export default function HomePage() {
                 Tell us about your goals. AcadPlan's AI builds a complete 4-year plan — courses, college list, test prep, and extracurriculars — personalized to you in seconds.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-                <Link href="/course-planner" className="btn-primary text-base px-7 py-3.5">
-                  Build My Plan — Free
+                <Link href="/signup" className="btn-primary text-base px-7 py-3.5">
+                  Join for Free
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
@@ -129,7 +129,7 @@ export default function HomePage() {
                 <a href="#features" className="btn-ghost text-base px-7 py-3.5">See How It Works</a>
               </div>
               <p className="mt-6 text-xs" style={{ color: "#475569" }}>
-                No account required · Results in under 30 seconds · AI-powered
+                Free account · Results in under 30 seconds · AI-powered
               </p>
             </div>
             <OrbitalHero />
@@ -228,10 +228,10 @@ export default function HomePage() {
                 </span>
               </h2>
               <p className="text-base mb-8 max-w-lg mx-auto" style={{ color: "#94A3B8" }}>
-                It takes 2 minutes to fill out your profile. Your personalized AI plan is ready in seconds — no account, no cost.
+                It takes 2 minutes to fill out your profile. Your personalized AI plan is ready in seconds — create a free account to get started.
               </p>
-              <Link href="/course-planner" className="btn-primary text-base px-8 py-4">
-                Build My Academic Plan
+              <Link href="/signup" className="btn-primary text-base px-8 py-4">
+                Join for Free
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>

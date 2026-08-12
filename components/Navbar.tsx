@@ -165,7 +165,7 @@ export default function Navbar() {
                     Log In
                   </Link>
                   <Link href="/signup" className="btn-primary text-sm px-5 py-2.5">
-                    Sign Up Free
+                    Join for Free
                   </Link>
                 </>
               )
@@ -254,7 +254,7 @@ export default function Navbar() {
                   Log In
                 </Link>
                 <Link href="/signup" className="btn-primary w-full text-sm">
-                  Sign Up Free
+                  Join for Free
                 </Link>
               </>
             )}

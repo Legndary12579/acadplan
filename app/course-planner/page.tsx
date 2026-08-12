@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import type { StudentProfile, FormState, GradeLevel, CollegeType } from "@/types";
 import { getUser, getSession } from "@/lib/supabase";
 import { MarkdownText } from "@/components/MarkdownText";
@@ -53,11 +54,13 @@ export default function CoursePlannerPage() {
   const [student, setStudent] = useState<StudentProfile>(EMPTY_STUDENT);
   const [formState, setFormState] = useState<FormState>({ step: "form", plan: null, error: null });
   const [userId, setUserId] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getUser().then((user) => {
       if (user) setUserId(user.id);
+      setAuthChecked(true);
     });
   }, []);
 
@@ -118,6 +121,43 @@ export default function CoursePlannerPage() {
     setStudent(EMPTY_STUDENT);
     setFormState({ step: "form", plan: null, error: null });
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // Still checking auth — avoid flashing the gate or the form
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0B1629" }}>
+        <div className="w-8 h-8 rounded-full animate-spin" style={{ border: "3px solid rgba(79,70,229,0.2)", borderTopColor: "#818CF8" }} />
+      </div>
+    );
+  }
+
+  // Not logged in — require an account before building a plan
+  if (!userId) {
+    return (
+      <div className="min-h-screen pt-16 flex items-center justify-center px-6" style={{ background: "radial-gradient(ellipse 70% 40% at 50% 0%, rgba(79,70,229,0.12) 0%, transparent 60%), #0B1629" }}>
+        <div className="max-w-md w-full text-center rounded-2xl p-8" style={{ background: "#111F3C", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: "linear-gradient(135deg, #4F46E5, #38BDF8)" }}>
+            <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+              <path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-bold mb-2" style={{ color: "#F0F4FF", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            Create a free account to build your plan
+          </h1>
+          <p className="text-sm mb-6" style={{ color: "#94A3B8" }}>
+            Signing up lets you save your academic plan, come back to it anytime, and keeps things fair for everyone using AcadPlan.
+          </p>
+          <Link href="/signup" className="btn-primary w-full text-sm py-3 justify-center mb-3">
+            Join for Free
+          </Link>
+          <p className="text-xs" style={{ color: "#64748B" }}>
+            Already have an account? <Link href="/login" className="font-semibold" style={{ color: "#818CF8" }}>Log in</Link>
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

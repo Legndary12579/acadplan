@@ -115,29 +115,33 @@ export async function POST(request: NextRequest) {
 
     const { student, userId: claimedUserId } = body;
 
+    // Require a valid, verified login — never trust a userId sent in the
+    // request body alone, since it could be spoofed. This route now
+    // requires an account (previously supported anonymous generation).
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ") || !claimedUserId) {
+      return NextResponse.json<ApiError>(
+        { error: "Please sign up or log in to generate a plan." },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.slice(7);
+    const verifiedUserId = await verifyAccessToken(token);
+    if (!verifiedUserId || verifiedUserId !== claimedUserId) {
+      return NextResponse.json<ApiError>(
+        { error: "Your session has expired. Please log in again." },
+        { status: 401 }
+      );
+    }
+
+    const saveClient = createUserScopedClient(token);
+
     if (!student?.name || !student?.gradeLevel || !student?.intendedMajor) {
       return NextResponse.json<ApiError>(
         { error: "Missing required fields: name, gradeLevel, intendedMajor." },
         { status: 400 }
       );
-    }
-
-    // Never trust a userId sent in the request body on its own — verify
-    // it against the actual bearer token, since the body value could be
-    // spoofed by anyone. If there's no valid token, save anonymously
-    // (matches the RLS policy allowing user_id = null inserts).
-    let verifiedUserId: string | undefined;
-    let saveClient = undefined as ReturnType<typeof createUserScopedClient> | undefined;
-    const authHeader = request.headers.get("authorization");
-    if (authHeader?.startsWith("Bearer ") && claimedUserId) {
-      const token = authHeader.slice(7);
-      const realUserId = await verifyAccessToken(token);
-      if (realUserId && realUserId === claimedUserId) {
-        verifiedUserId = realUserId;
-        saveClient = createUserScopedClient(token);
-      } else {
-        console.warn("[API /plan] userId in request did not match verified token — saving anonymously.");
-      }
     }
 
     const response = await getGenAI().models.generateContent({
@@ -161,9 +165,7 @@ export async function POST(request: NextRequest) {
     // Save to Supabase (non-fatal — a save failure shouldn't block the
     // student from seeing their generated plan)
     try {
-      const { error: saveError } = saveClient
-        ? await saveStudentPlan(student, planText, verifiedUserId, saveClient)
-        : await saveStudentPlan(student, planText, undefined);
+      const { error: saveError } = await saveStudentPlan(student, planText, verifiedUserId, saveClient);
       if (saveError) {
         console.warn("[API /plan] Supabase save returned an error:", saveError);
       }

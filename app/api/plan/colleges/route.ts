@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { verifyAccessToken } from "@/lib/supabase";
 
 const GEMINI_MODEL = "gemini-3.5-flash";
 
@@ -136,6 +137,24 @@ export async function POST(request: NextRequest) {
           error: `You've reached the limit of ${RATE_LIMIT} college searches per hour. Please try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.`,
         },
         { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds ?? 3600) } }
+      );
+    }
+
+    // Require a valid, verified login — this route now requires an
+    // account (previously supported anonymous use).
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { error: "Please sign up or log in to use College Finder." },
+        { status: 401 }
+      );
+    }
+    const token = authHeader.slice(7);
+    const verifiedUserId = await verifyAccessToken(token);
+    if (!verifiedUserId) {
+      return NextResponse.json(
+        { error: "Your session has expired. Please log in again." },
+        { status: 401 }
       );
     }
 
