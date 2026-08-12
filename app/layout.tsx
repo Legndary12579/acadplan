@@ -53,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <nav className="flex items-center gap-6">
                 <a href="/" className="text-xs hover:text-white transition-colors" style={{ color: "#475569" }}>Home</a>
                 <a href="/course-planner" className="text-xs hover:text-white transition-colors" style={{ color: "#475569" }}>Course Planner</a>
+                <a href="/privacy" className="text-xs hover:text-white transition-colors" style={{ color: "#475569" }}>Privacy</a>
               </nav>
 
               <p className="text-xs" style={{ color: "#475569" }}>

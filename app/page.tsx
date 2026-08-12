@@ -154,6 +154,31 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Texas Auto-Admit Calculator banner */}
+      <section className="section pt-0">
+        <div className="container-app px-6">
+          <a
+            href="/texas-auto-admit-calculator"
+            className="group flex flex-col md:flex-row items-center justify-between gap-4 rounded-2xl p-6 md:px-8 transition-all"
+            style={{ background: "linear-gradient(135deg, rgba(52,211,153,0.1) 0%, rgba(56,189,248,0.06) 100%)", border: "1px solid rgba(52,211,153,0.2)" }}
+          >
+            <div className="flex items-center gap-4 text-center md:text-left">
+              <span className="text-3xl flex-shrink-0">🎓</span>
+              <div>
+                <p className="text-sm font-bold mb-0.5" style={{ color: "#F0F4FF" }}>Texas Student? Check Your Auto-Admit Status Free</p>
+                <p className="text-xs" style={{ color: "#94A3B8" }}>Instant check for UT Austin, Texas A&M & other TX public universities — no sign-up needed</p>
+              </div>
+            </div>
+            <span className="flex-shrink-0 flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-xl transition-transform group-hover:translate-x-0.5" style={{ background: "rgba(52,211,153,0.15)", color: "#34D399" }}>
+              Check Now
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </span>
+          </a>
+        </div>
+      </section>
+
       {/* Features */}
       <section id="features" className="section">
         <div ref={featuresRef} className="reveal container-app">
